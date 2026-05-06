@@ -1,23 +1,54 @@
 const User = require("../models/User");
 
-// CREATE USER (admin only later)
-exports.createUser = async (req, res) => {
+// CREATE USER
+const createUser = async (req, res) => {
   try {
-    const { name, matricule, role } = req.body;
-
-    const exists = await User.findOne({ matricule });
-    if (exists) {
-      return res.status(400).json({ message: "Matricule already exists" });
-    }
-
-    const user = await User.create({
-      name,
-      matricule: matricule.toUpperCase(),
-      role,
-    });
-
-    res.status(201).json(user);
-  } catch (error) {
-    res.status(500).json({ message: error.message });
+    const user = await User.create(req.body);
+    res.json(user);
+  } catch (err) {
+    res.status(500).json({ message: err.message });
   }
+};
+
+// GET ALL USERS
+const getUsers = async (req, res) => {
+  try {
+    const users = await User.find();
+    res.json(users);
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+};
+
+// SUSPEND USER
+const suspendUser = async (req, res) => {
+  try {
+    const user = await User.findByIdAndUpdate(
+      req.params.id,
+      { suspended: true },
+      { new: true }
+    );
+
+    res.json(user);
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+};
+
+// DELETE USER
+const deleteUser = async (req, res) => {
+  try {
+    await User.findByIdAndDelete(req.params.id);
+    res.json({ message: "User deleted" });
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+};
+
+// ✅ CRITICAL EXPORT FIX
+module.exports = {
+  createUser,
+  getUsers,
+  suspendUser,
+  deleteUser
 };
